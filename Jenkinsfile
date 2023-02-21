@@ -1,12 +1,12 @@
-node {
-    def app
+pipeline{
+agent any
+stages{
+    stage('Gitcode'){
+        steps{
+            
 
-    stage('Clone repository') {
-      
-
-        checkout scm
+        }
     }
-
     stage('Build image') {
   
        app = docker.build("raj80dockerid/test")
