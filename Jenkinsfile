@@ -21,11 +21,12 @@ stages{
         }
         }
     }
-     }
+     
     stage('Trigger') {
         steps{
                sh 'echo "triggering updatemanifestjob"'
                  sh 'build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_ID)]'
                }
     }
+}
 }
