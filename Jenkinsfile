@@ -3,32 +3,27 @@ agent any
 stages{
     stage('Gitcode'){
         steps{
-            
-
-        }
+            git branch: 'main', url: 'https://github.com/rajdeepsingh642/gitops-agrocd.git'
+         }
     }
     stage('Build image') {
-  
-       app = docker.build("raj80dockerid/test")
-    }
-
-    stage('Test image') {
-  
-
-        app.inside {
-            sh 'echo "Tests passed"'
+        steps{
+            sh 'docker image build -t $JOB_NAME:v1.$BUILD_ID .'
+            sh 'docker image tag $JOB_NAME:v1.$BUILD_ID rajdeepsingh642/$JOB_NAME:v1.$BUILD_ID'
+            sh 'docker image tag $JOB_NAME:v1.$BUILD_ID rajdeepsingh642/$JOB_NAME:latest'
+           }
         }
-    }
-
     stage('Push image') {
-        
-        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-            app.push("${env.BUILD_NUMBER}")
+        steps{
+        withCredentials([string(credentialsId: 'rajdeepsingh642', variable: 'dockerhub')]) {
+        sh "docker login -u rajdeepsingh642 -p ${dockerhub}"
+        sh 'docker image push rajdeepsingh642/$JOB_NAME:latest'
+        }
         }
     }
-    
+     }
     stage('Trigger ManifestUpdate') {
                 echo "triggering updatemanifestjob"
-                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: BUILD_ID)]
         }
 }
